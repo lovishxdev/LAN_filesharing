@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LAN Share - Guest</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+
+        .connection-status {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .status-connecting {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            color: #1565c0;
+            border: 2px solid #2196f3;
+        }
+
+        .status-connected {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            color: #155724;
+            border: 2px solid #28a745;
+        }
+
+        .status-receiving {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            color: #856404;
+            border: 2px solid #ffc107;
+        }
+
+        .waiting-section {
+            margin: 30px 0;
+            padding: 30px;
+            border: 2px dashed #ddd;
+            border-radius: 15px;
+            background: rgba(248, 249, 250, 0.8);
+        }
+
+        .waiting-animation {
+            width: 60px;
+            height: 60px;
+            margin: 20px auto;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .file-received-section {
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(248, 249, 250, 0.8);
+            border-radius: 15px;
+            border-left: 4px solid #28a745;
+        }
+
+        .file-info {
+            background: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: left;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+
+        .file-details {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .download-btn {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            text-decoration: none;
+            display: inline-block;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(40, 167, 69, 0.4);
+            border: none;
+            cursor: pointer;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.6);
+            text-decoration: none;
+            color: white;
+        }
+
+        .download-btn:active {
+            transform: translateY(0);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745, #20c997);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 3px;
+        }
+
+        .peer-id-display {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            color: #495057;
+            font-size: 0.9rem;
+        }
+
+        .instructions {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #17a2b8;
+        }
+
+        .instructions h3 {
+            color: #17a2b8;
+            margin-bottom: 10px;
+        }
+
+        .instructions p {
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 8px;
+        }
+
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Success animation */
+        .success-animation {
+            width: 60px;
+            height: 60px;
+            margin: 20px auto;
+            background: #28a745;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            animation: bounceIn 0.6s ease-out;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+                margin: 10px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .logo {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+
+            .download-btn {
+                width: 100%;
+                text-align: center;
+                margin: 10px 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px 15px;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+        }
+
+        /* File type icons */
+        .file-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 1.2rem;
+            vertical-align: middle;
+        }
+
+        .file-icon.image { background: #e3f2fd; color: #1976d2; }
+        .file-icon.video { background: #fce4ec; color: #c2185b; }
+        .file-icon.audio { background: #f3e5f5; color: #7b1fa2; }
+        .file-icon.document { background: #e8f5e8; color: #388e3c; }
+        .file-icon.archive { background: #fff3e0; color: #f57c00; }
+        .file-icon.default { background: #f5f5f5; color: #757575; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">📱</div>
+        <h1>LAN Share</h1>
+        <p class="subtitle">Ready to receive files</p>
+        
+        <div class="connection-status status-connecting" id="connectionStatus">
+            🔄 Connecting to host...
+        </div>
+
+        <div class="peer-id-display">
+            <strong>Connection ID:</strong> <span id="peerIdDisplay"></span>
+        </div>
+
+        <div class="instructions">
+            <h3>📋 How it works</h3>
+            <p>• You've successfully scanned the QR code</p>
+            <p>• Connecting to the host device...</p>
+            <p>• Files will appear here when shared</p>
+        </div>
+
+        <div class="waiting-section" id="waitingSection">
+            <div class="waiting-animation"></div>
+            <h3 style="color: #666; margin-top: 15px;">Waiting for files...</h3>
+            <p style="color: #888; margin-top: 10px;">The host can now send files to this device</p>
+        </div>
+
+        <div class="file-received-section hidden" id="connected-screen">
+            <div class="success-animation">✓</div>
+            <h3 style="color: #28a745; margin-bottom: 20px;">File Received!</h3>
+            <div class="file-info" id="fileInfo">
+                <!-- File info will be populated here -->
+            </div>
+            <a id="downloadLink" class="download-btn hidden">
+                ⬇️ Download File
+            </a>
+        </div>
+
+        <div class="footer">
+            <p>Secure peer-to-peer file transfer</p>
+            <p style="font-size: 0.8rem; margin-top: 5px;">Files are transferred directly between devices</p>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const peerId = window.location.pathname.split('/peer/')[1];
+        let peerConnection;
+        let receivedMeta = null;
+
+        // DOM elements
+        const connectionStatus = document.getElementById('connectionStatus');
+        const peerIdDisplay = document.getElementById('peerIdDisplay');
+        const waitingSection = document.getElementById('waitingSection');
+        const connectedScreen = document.getElementById('connected-screen');
+        const downloadLink = document.getElementById('downloadLink');
+        const fileInfo = document.getElementById('fileInfo');
+
+        // Display peer ID
+        peerIdDisplay.textContent = peerId;
+
+        // Join the room
+        socket.emit('join', peerId);
+
+        // Connection established
+        socket.on('connected', () => {
+            console.log('🎉 Connected to host!');
+            connectionStatus.className = 'connection-status status-connected';
+            connectionStatus.innerHTML = '✅ Connected to host - Ready for files!';
+            
+            peerConnection = new RTCPeerConnection();
+
+            // Handle incoming data channel
+            peerConnection.ondatachannel = (event) => {
+                const dataChannel = event.channel;
+                
+                dataChannel.onmessage = (e) => {
+                    if (typeof e.data === 'string') {
+                        try {
+                            const parsed = JSON.parse(e.data);
+                            if (parsed.meta) {
+                                receivedMeta = parsed.meta;
+                                console.log("📦 Metadata received:", receivedMeta);
+                                
+                                // Update UI to show receiving status
+                                connectionStatus.className = 'connection-status status-receiving';
+                                connectionStatus.innerHTML = '📥 Receiving file...';
+                                
+                                return;
+                            }
+                        } catch (err) {
+                            console.warn("❌ Failed to parse metadata", err);
+                        }
+                    }
+
+                    // Handle binary file data
+                    if (receivedMeta) {
+                        handleReceivedFile(e.data, receivedMeta);
+                    }
+                };
+            };
+
+            // ICE candidates
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate) {
+                    socket.emit('signal', { type: 'candidate', candidate: event.candidate });
+                }
+            };
+        });
+
+        // Handle signaling
+        socket.on('signal', async (data) => {
+            if (data.type === 'offer') {
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
+                const answer = await peerConnection.createAnswer();
+                await peerConnection.setLocalDescription(answer);
+                socket.emit('signal', { type: 'answer', answer });
+            } else if (data.type === 'candidate') {
+                await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+            }
+        });
+
+        // Handle received file
+        function handleReceivedFile(data, metadata) {
+            const blob = new Blob([data], { type: metadata.type || 'application/octet-stream' });
+            
+            // Update connection status
+            connectionStatus.className = 'connection-status status-connected';
+            connectionStatus.innerHTML = '✅ File received successfully!';
+            
+            // Hide waiting section and show received file section
+            waitingSection.classList.add('hidden');
+            connectedScreen.classList.remove('hidden');
+            
+            // Create file info display
+            const fileIcon = getFileIcon(metadata.fileName, metadata.type);
+            const fileSize = formatFileSize(metadata.size);
+            
+            fileInfo.innerHTML = `
+                <div style="display: flex; align-items: center;">
+                    <div class="file-icon ${fileIcon.class}">${fileIcon.icon}</div>
+                    <div>
+                        <div class="file-name">${metadata.fileName}</div>
+                        <div class="file-details">
+                            Size: ${fileSize} • Type: ${metadata.type || 'Unknown'}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Setup download link
+            downloadLink.href = URL.createObjectURL(blob);
+            downloadLink.download = metadata.fileName || 'downloaded-file';
+            downloadLink.textContent = `⬇️ Download ${metadata.fileName}`;
+            downloadLink.classList.remove('hidden');
+            
+            // Add click handler for download tracking
+            downloadLink.addEventListener('click', () => {
+                setTimeout(() => {
+                    connectionStatus.innerHTML = '🎉 File downloaded successfully!';
+                }, 500);
+            });
+        }
+
+        // Get file icon based on file type
+        function getFileIcon(fileName, mimeType) {
+            const extension = fileName.split('.').pop().toLowerCase();
+            
+            if (mimeType) {
+                if (mimeType.startsWith('image/')) return { icon: '🖼️', class: 'image' };
+                if (mimeType.startsWith('video/')) return { icon: '🎥', class: 'video' };
+                if (mimeType.startsWith('audio/')) return { icon: '🎵', class: 'audio' };
+                if (mimeType.includes('pdf')) return { icon: '📄', class: 'document' };
+                if (mimeType.includes('text') || mimeType.includes('document')) return { icon: '📝', class: 'document' };
+            }
+            
+            // Fallback to extension-based detection
+            const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp'];
+            const videoExts = ['mp4', 'avi', 'mkv', 'mov', 'wmv', 'flv', 'webm'];
+            const audioExts = ['mp3', 'wav', 'flac', 'aac', 'ogg', 'm4a'];
+            const documentExts = ['pdf', 'doc', 'docx', 'txt', 'rtf', 'odt'];
+            const archiveExts = ['zip', 'rar', '7z', 'tar', 'gz', 'bz2'];
+            
+            if (imageExts.includes(extension)) return { icon: '🖼️', class: 'image' };
+            if (videoExts.includes(extension)) return { icon: '🎥', class: 'video' };
+            if (audioExts.includes(extension)) return { icon: '🎵', class: 'audio' };
+            if (documentExts.includes(extension)) return { icon: '📄', class: 'document' };
+            if (archiveExts.includes(extension)) return { icon: '📦', class: 'archive' };
+            
+            return { icon: '📁', class: 'default' };
+        }
+
+        // Format file size
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Handle connection errors
+        socket.on('error', (error) => {
+            console.error('Socket error:', error);
+            connectionStatus.className = 'connection-status status-connecting';
+            connectionStatus.innerHTML = '❌ Connection error - Please try scanning again';
+        });
+
+        // Handle disconnect
+        socket.on('disconnect', () => {
+            connectionStatus.className = 'connection-status status-connecting';
+            connectionStatus.innerHTML = '❌ Connection lost';
+        });
+
+        // Auto-scroll to download when file is received
+        function scrollToDownload() {
+            connectedScreen.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
