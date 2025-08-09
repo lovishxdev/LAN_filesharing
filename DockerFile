@@ -1,0 +1,17 @@
+# Use official Node.js from Docker Hub
+FROM node:18
+
+# Set the folder where your app will live
+WORKDIR /app
+
+# Copy all files from your project into the Docker image
+COPY . .
+
+# Install Node.js dependencies
+RUN npm install
+
+# Expose the port your app uses (usually 3000, change if needed)
+EXPOSE 3001
+
+# Start your app (replace "app.js" with your main file, like "server.js" or "index.js")
+CMD ["node", "server.js"]
